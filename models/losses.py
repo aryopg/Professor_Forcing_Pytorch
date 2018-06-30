@@ -22,37 +22,18 @@ class JSDLoss(nn.Module):
 
         dev_f_real = f_real - f_real_mean.expand(batch_size,f_num_features) # batch_size x num_feat
         dev_f_synt = f_synt - f_synt_mean.expand(batch_size,f_num_features) # batch_size x num_feat
-        
-        print(dev_f_real.shape)
-        print(dev_f_synt.shape)
-        print(torch.equal(dev_f_real, dev_f_synt))
 
         f_real_xx = torch.mm(torch.t(dev_f_real), dev_f_real) # num_feat x batch_size * batch_size x num_feat = num_feat x num_feat
         f_synt_xx = torch.mm(torch.t(dev_f_synt), dev_f_synt) # num_feat x batch_size * batch_size x num_feat = num_feat x num_feat
-        
-        print(f_real_xx.shape)
-        print(f_synt_xx.shape)
-        print(torch.equal(f_real_xx, f_synt_xx))
 
         cov_mat_f_real = f_real_xx / (batch_size-1) - torch.mm(f_real_mean, torch.t(f_real_mean)) + identity # num_feat x num_feat
         cov_mat_f_synt = f_synt_xx / (batch_size-1) - torch.mm(f_synt_mean, torch.t(f_synt_mean)) + identity # num_feat x num_feat
-        
-        print(cov_mat_f_real.shape)
-        print(cov_mat_f_synt.shape)
-        print(torch.equal(cov_mat_f_real, cov_mat_f_synt))
 
         cov_mat_f_real_inv = torch.inverse(cov_mat_f_real)#.to('cpu')
         cov_mat_f_synt_inv = torch.inverse(cov_mat_f_synt)#.to('cpu')
-        
-        print(torch.equal(cov_mat_f_real_inv, cov_mat_f_synt_inv))
-        
-        print(torch.mm(cov_mat_f_synt_inv, cov_mat_f_real))
-        
-        print(torch.mm(cov_mat_f_synt_inv, cov_mat_f_real).diag().sum())
 
         temp1 = torch.trace(torch.add(torch.mm(cov_mat_f_synt_inv, cov_mat_f_real), torch.mm(cov_mat_f_real_inv, cov_mat_f_synt)))
-        print(temp1)
         temp2 = torch.mm(torch.mm((f_synt_mean - f_real_mean), (cov_mat_f_synt_inv + cov_mat_f_real_inv)), torch.t(f_synt_mean - f_real_mean))
-        loss_g = torch.add(temp1, temp2)
-        print(temp2)
+        loss_g = (torch.add(temp1, temp2) - (2 * f_num_features)) / 4
+
         return loss_g
