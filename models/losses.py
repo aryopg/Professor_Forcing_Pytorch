@@ -34,7 +34,7 @@ class JSDLoss(nn.Module):
 
         temp1 = torch.trace(torch.add(torch.mm(cov_mat_f_synt_inv, cov_mat_f_real), torch.mm(cov_mat_f_real_inv, cov_mat_f_synt)))
         temp2 = torch.mm(torch.mm((f_synt_mean - f_real_mean), (cov_mat_f_synt_inv + cov_mat_f_real_inv)), torch.t(f_synt_mean - f_real_mean))
-        loss_g = temp1 + temp2
+        loss_g = (temp1 + temp2 - (2 * f_num_features)) / 4
 
         return loss_g
 
