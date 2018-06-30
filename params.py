@@ -20,11 +20,12 @@ eng_prefixes = (
 ################### NETWORK ARCHITECTURE PARAMS ######################
 ######################################################################
 
-N_ITERS = 20
-BATCH_SIZE = 32
+N_ITERS = 500
+BATCH_SIZE = 64
 MAX_LENGTH = 10
 HIDDEN_SIZE = 256
-LEARNING_RATE = 0.01
+LEARNING_RATE = 0.001
+D_PRESTEP = 5
 
 ######################################################################
 ##################### HARDWARE-RELATED PARAMS ########################
