@@ -37,3 +37,27 @@ class JSDLoss(nn.Module):
         loss_g = temp1 + temp2
 
         return loss_g
+
+class JSDLoss2(nn.Module):
+    def __init__(self):
+        super(JSDLoss2,self).__init__()
+
+    def forward(self, f_real, f_synt):
+        f_real_mean = torch.mean(f_real)
+        f_synt_mean = torch.mean(f_synt)
+
+        f_real_std = torch.std(f_real)
+        f_synt_std = torch.std(f_synt)
+        
+        loss_p_q = self.custom_kl_div(f_real_mean, f_synt_mean, f_real_std, f_synt_std)
+        loss_p_p = self.custom_kl_div(f_real_mean, f_real_mean, f_real_std, f_real_std)
+        loss_q_p = self.custom_kl_div(f_synt_mean, f_real_mean, f_synt_std, f_real_std)
+        loss_q_q = self.custom_kl_div(f_synt_mean, f_synt_mean, f_synt_std, f_synt_std)
+        loss_g = (loss_p_q + loss_p_p + loss_q_p + loss_q_q) / 2
+
+        return loss_g
+    
+    def custom_kl_div(self, mean1, mean2, std1, std2):
+        part1 = torch.log(torch.div(std2, std1))
+        part2 = torch.div(torch.pow(std1, 2) + torch.pow((mean1 - mean2), 2), 2*torch.pow(std2, 2))
+        return part1 + part2 - 0.5
